@@ -103,13 +103,12 @@ impl Destination {
     pub fn new(id: &str, family: &DestinationFamily, audio: bool, video: bool) -> Self {
         let video_appsrc = if video {
             Some(
-                gst::ElementFactory::make(
-                    "appsrc",
-                    Some(&format!("destination-video-appsrc-{}", id)),
-                )
-                .unwrap()
-                .downcast::<gst_app::AppSrc>()
-                .unwrap(),
+                gst::ElementFactory::make("appsrc")
+                    .name(&format!("destination-video-appsrc-{}", id))
+                    .build()
+                    .unwrap()
+                    .downcast::<gst_app::AppSrc>()
+                    .unwrap(),
             )
         } else {
             None
@@ -117,13 +116,12 @@ impl Destination {
 
         let audio_appsrc = if audio {
             Some(
-                gst::ElementFactory::make(
-                    "appsrc",
-                    Some(&format!("destination-audio-appsrc-{}", id)),
-                )
-                .unwrap()
-                .downcast::<gst_app::AppSrc>()
-                .unwrap(),
+                gst::ElementFactory::make("appsrc")
+                    .name(&format!("destination-audio-appsrc-{}", id))
+                    .build()
+                    .unwrap()
+                    .downcast::<gst_app::AppSrc>()
+                    .unwrap(),
             )
         } else {
             None

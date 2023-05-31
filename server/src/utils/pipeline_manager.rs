@@ -104,7 +104,7 @@ impl StreamHandler<BusMessage> for PipelineManager {
             }
             MessageView::Latency(_) => {
                 if let Some(src) = msg.0.src() {
-                    if &src == self.pipeline.upcast_ref::<gst::Object>()
+                    if &src == &self.pipeline.upcast_ref::<gst::Object>()
                         || src.has_as_ancestor(&self.pipeline)
                     {
                         trace!("Pipeline for node {} updated latency", self.id);
@@ -159,7 +159,7 @@ impl StreamHandler<BusMessage> for PipelineManager {
                 }
             }
             MessageView::StateChanged(state_changed) => {
-                if Some(self.pipeline.upcast_ref()) == state_changed.src().as_ref() {
+                if Some(&self.pipeline.upcast_ref()) == state_changed.src().as_ref() {
                     self.pipeline.debug_to_dot_file_with_ts(
                         gst::DebugGraphDetails::all(),
                         format!(

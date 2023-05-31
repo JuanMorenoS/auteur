@@ -48,7 +48,7 @@ impl StreamProducer {
     ///
     /// This is useful for example for prerolling live sources.
     pub fn forward(&self) {
-        self.inner.lock().unwrap().producer.forward();
+        self.inner.lock().unwrap().producer.set_forward_eos(false);
     }
 
     /// Get the GStreamer `appsink` wrapped by this producer

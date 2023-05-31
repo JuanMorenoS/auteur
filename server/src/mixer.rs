@@ -104,7 +104,9 @@ impl VideoOutput {
     fn new(id: &str) -> Self {
         let id = format!("video-{}", id);
 
-        let appsink = gst::ElementFactory::make("appsink", Some(&format!("mixer-appsink-{}", id)))
+        let appsink = gst::ElementFactory::make("appsink")
+            .name(&format!("mixer-appsink-{}", id))
+            .build()
             .unwrap()
             .downcast::<gst_app::AppSink>()
             .unwrap();
@@ -393,7 +395,9 @@ impl AudioOutput {
     #[instrument(level = "debug", name = "creating")]
     fn new(id: &str) -> Self {
         let id = format!("audio-{}", id);
-        let appsink = gst::ElementFactory::make("appsink", Some(&format!("mixer-appsink-{}", id)))
+        let appsink = gst::ElementFactory::make("appsink")
+            .name(&format!("mixer-appsink-{}", id))
+            .build()
             .unwrap()
             .downcast::<gst_app::AppSink>()
             .unwrap();
@@ -956,13 +960,12 @@ impl Mixer {
         let video_slot = if let Some(producer) = video_producer {
             self.video_output.as_ref().map(|output| InputSlot {
                 producer,
-                appsrc: gst::ElementFactory::make(
-                    "appsrc",
-                    Some(&format!("mixer-slot-video-appsrc-{}", link_id)),
-                )
-                .unwrap()
-                .downcast::<gst_app::AppSrc>()
-                .unwrap(),
+                appsrc: gst::ElementFactory::make("appsrc")
+                    .name(&format!("mixer-slot-video-appsrc-{}", link_id))
+                    .build()
+                    .unwrap()
+                    .downcast::<gst_app::AppSrc>()
+                    .unwrap(),
                 bin: None,
                 pad: output.output.mixer.request_pad_simple("sink_%u").unwrap(),
             })
@@ -973,13 +976,12 @@ impl Mixer {
         let audio_slot = if let Some(producer) = audio_producer {
             self.audio_output.as_ref().map(|output| InputSlot {
                 producer,
-                appsrc: gst::ElementFactory::make(
-                    "appsrc",
-                    Some(&format!("mixer-slot-audio-appsrc-{}", link_id)),
-                )
-                .unwrap()
-                .downcast::<gst_app::AppSrc>()
-                .unwrap(),
+                appsrc: gst::ElementFactory::make("appsrc")
+                    .name(&format!("mixer-slot-audio-appsrc-{}", link_id))
+                    .build()
+                    .unwrap()
+                    .downcast::<gst_app::AppSrc>()
+                    .unwrap(),
                 bin: None,
                 pad: output.output.mixer.request_pad_simple("sink_%u").unwrap(),
             })

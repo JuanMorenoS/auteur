@@ -22,7 +22,14 @@ pub use stream_producer::StreamProducer;
 /// Wrapper around `gst::ElementFactory::make` with a better error
 /// message
 pub fn make_element(element: &str, name: Option<&str>) -> Result<gst::Element, Error> {
-    gst::ElementFactory::make(element, name)
+    let mut elementgst = gst::ElementFactory::make(element);
+    elementgst = match name {
+        Some(expr) => elementgst.name(expr),
+        None => elementgst,
+    };
+
+    elementgst
+        .build()
         .map_err(|err| anyhow!("Failed to make element {}: {}", element, err.message))
 }
 

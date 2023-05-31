@@ -78,7 +78,9 @@ impl Source {
     pub fn new(id: &str, uri: &str, audio: bool, video: bool) -> Self {
         let audio_producer = if audio {
             Some(StreamProducer::from(
-                &gst::ElementFactory::make("appsink", Some(&format!("src-audio-appsink-{}", id)))
+                &gst::ElementFactory::make("appsink")
+                    .name(&format!("src-audio-appsink-{}", id))
+                    .build()
                     .unwrap()
                     .downcast::<gst_app::AppSink>()
                     .unwrap(),
@@ -89,7 +91,9 @@ impl Source {
 
         let video_producer = if video {
             Some(StreamProducer::from(
-                &gst::ElementFactory::make("appsink", Some(&format!("src-video-appsink-{}", id)))
+                &gst::ElementFactory::make("appsink")
+                    .name(&format!("src-video-appsink-{}", id))
+                    .build()
                     .unwrap()
                     .downcast::<gst_app::AppSink>()
                     .unwrap(),
