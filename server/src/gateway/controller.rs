@@ -3,7 +3,7 @@
 //! Receives JSON messages through websockets, conforming with
 //! [`this protocol`](auteur_controlling::controller)
 
-use crate::node::{CommandMessage, NodeManager};
+use crate::nodes::node::{CommandMessage, NodeManager};
 
 use anyhow::{format_err, Error};
 

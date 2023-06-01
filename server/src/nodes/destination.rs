@@ -14,7 +14,7 @@ use tracing::{debug, error, instrument, trace};
 
 use auteur_controlling::controller::{DestinationFamily, DestinationInfo, NodeInfo, State};
 
-use crate::node::{
+use super::node::{
     AddControlPointMessage, ConsumerMessage, GetNodeInfoMessage, NodeManager, NodeStatusMessage,
     RemoveControlPointMessage, ScheduleMessage, StartMessage, StopMessage, StoppedMessage,
 };

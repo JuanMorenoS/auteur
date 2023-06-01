@@ -1,10 +1,9 @@
 //! Implementation of the HTTP service
 
+use super::config::Config;
 use std::sync::Arc;
 
-use crate::config::Config;
-use crate::controller::Controller;
-use crate::node::{CommandMessage, NodeManager, StopMessage};
+use crate::nodes::node::{CommandMessage, NodeManager, StopMessage};
 
 use actix::{Actor, Addr, SystemService};
 use actix_web::{error, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -34,7 +33,6 @@ pub async fn run(cfg: Config) -> Result<(), anyhow::Error> {
             .app_data(web::Data::new(node_manager.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap(tracing_actix_web::TracingLogger::default())
-            // .route("/ws/{mode:(control)}", web::get().to(ws))
             .route("/command", web::post().to(create_command))
     });
 

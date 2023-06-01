@@ -18,7 +18,7 @@
 //! pipeline and moved to a new one, this is safe but needs to be kept
 //! in mind.
 
-use crate::node::{
+use super::node::{
     AddControlPointMessage, GetNodeInfoMessage, GetProducerMessage, NodeManager, NodeStatusMessage,
     RemoveControlPointMessage, ScheduleMessage, StartMessage, StopMessage, StoppedMessage,
 };

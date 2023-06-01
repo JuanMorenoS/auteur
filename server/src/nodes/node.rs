@@ -6,9 +6,10 @@
 //! Nodes can produce and / or consume data, and are connected to one
 //! another through [`StreamProducer`](crate::utils::StreamProducer)
 
-use crate::destination::Destination;
-use crate::mixer::Mixer;
-use crate::source::Source;
+use super::destination::Destination;
+use super::mixer::Mixer;
+use super::source::Source;
+
 use crate::utils::StreamProducer;
 use actix::prelude::*;
 use actix::WeakRecipient;

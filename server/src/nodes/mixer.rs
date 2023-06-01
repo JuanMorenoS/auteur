@@ -13,7 +13,7 @@ use tracing::{debug, error, instrument, trace};
 
 use auteur_controlling::controller::{ControlPoint, MixerInfo, MixerSlotInfo, NodeInfo, State};
 
-use crate::node::{
+use super::node::{
     AddControlPointMessage, ConsumerMessage, GetNodeInfoMessage, GetProducerMessage, NodeManager,
     NodeStatusMessage, RemoveControlPointMessage, ScheduleMessage, StartMessage, StopMessage,
     StoppedMessage,

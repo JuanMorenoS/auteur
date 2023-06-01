@@ -24,19 +24,14 @@
 //
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-mod config;
-mod controller;
-mod destination;
-mod mixer;
-mod node;
-mod server;
-mod source;
+mod gateway;
+mod nodes;
 mod utils;
 
 use anyhow::{anyhow, Error};
 use structopt::StructOpt;
 
-use config::Config;
+use crate::gateway::config::Config;
 
 use tracing_subscriber::prelude::*;
 
@@ -87,7 +82,7 @@ fn main() -> Result<(), Error> {
     gst::init()?;
 
     let system = actix_rt::System::new();
-    system.block_on(server::run(cfg))?;
+    system.block_on(gateway::server::run(cfg))?;
 
     Ok(())
 }

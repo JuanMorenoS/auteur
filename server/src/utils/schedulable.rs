@@ -8,7 +8,7 @@ use tracing::{instrument, trace};
 
 use auteur_controlling::controller::State;
 
-use crate::node::{NodeManager, NodeStatusMessage};
+use crate::nodes::node::{NodeManager, NodeStatusMessage};
 use crate::utils::get_now;
 
 /// State machine governing the progression of a [`node`](crate::node) state
