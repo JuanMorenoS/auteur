@@ -1,41 +1,41 @@
 //! Implementation of the HTTP service
 
+use std::sync::Arc;
+
 use crate::config::Config;
 use crate::controller::Controller;
-use crate::node::{NodeManager, StopMessage};
+use crate::node::{CommandMessage, NodeManager, StopMessage};
 
-use actix::SystemService;
-use actix_web::{error, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix::{Actor, Addr, SystemService};
+use actix_web::{error, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
 
+use auteur_controlling::controller::Command;
 use tracing::error;
 
-/// Create Subscriber/Publisher WebSocket actors.
-async fn ws(
-    path: web::Path<String>,
-    req: HttpRequest,
-    stream: web::Payload,
-) -> Result<HttpResponse, actix_web::Error> {
-    match path.as_str() {
-        "control" => {
-            let controller = Controller::new(&req.connection_info()).map_err(|err| {
-                error!("Failed to create controller: {}", err);
-                error::ErrorInternalServerError(err)
-            })?;
+async fn create_command(
+    node_manager: web::Data<Addr<NodeManager>>,
+    json: web::Json<Command>,
+) -> HttpResponse {
+    let message = CommandMessage { command: json.0 };
+    let response = node_manager.send(message).await;
 
-            ws::start(controller, &req, stream)
-        }
-        _ => Ok(HttpResponse::NotFound().finish()),
-    }
+    HttpResponse::Ok()
+        .content_type::<_>("application/json")
+        .body(format!("{:?}", response))
 }
 
 /// Start the server based on the passed `Config`.
 pub async fn run(cfg: Config) -> Result<(), anyhow::Error> {
+    let node_manager = NodeManager::from_registry();
+
     let server = HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(node_manager.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap(tracing_actix_web::TracingLogger::default())
-            .route("/ws/{mode:(control)}", web::get().to(ws))
+            // .route("/ws/{mode:(control)}", web::get().to(ws))
+            .route("/command", web::post().to(create_command))
     });
 
     let server = if cfg.use_tls {
