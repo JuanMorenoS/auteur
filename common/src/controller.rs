@@ -56,6 +56,14 @@ pub enum Command {
     /// Create a source
     ///
     /// No slot properties are available.
+    CreateVideoGenerator {
+        /// Unique identifier of the source
+        id: String,
+    },
+
+    /// Create a source
+    ///
+    /// No slot properties are available.
     CreateSource {
         /// Unique identifier of the source
         id: String,

@@ -9,7 +9,7 @@
 use super::destination::Destination;
 use super::mixer::Mixer;
 use super::source::Source;
-
+use crate::nodes::video_generator::VideoGenerator;
 use crate::utils::StreamProducer;
 use actix::prelude::*;
 use actix::WeakRecipient;
@@ -263,6 +263,7 @@ impl Message for RegisterListenerMessage {
 /// All the node types NodeManager supports
 #[derive(Clone)]
 enum Node {
+    VideoGenerator(Addr<VideoGenerator>),
     /// A source node is a producer
     Source(Addr<Source>),
     /// A destination node is a consumer
@@ -275,6 +276,7 @@ impl Node {
     /// Start the node
     fn start(&mut self, msg: StartMessage) -> ResponseFuture<Result<(), Error>> {
         let recipient: Recipient<StartMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -290,6 +292,7 @@ impl Node {
     /// Reschedule the node
     fn schedule(&mut self, msg: ScheduleMessage) -> ResponseFuture<Result<(), Error>> {
         let recipient: Recipient<ScheduleMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -305,6 +308,7 @@ impl Node {
     /// Stop the node
     fn stop(&mut self) {
         let recipient: Recipient<StopMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -315,6 +319,7 @@ impl Node {
     /// Get node-specific info
     fn get_info(&mut self) -> ResponseFuture<Result<NodeInfo, Error>> {
         let recipient: Recipient<GetNodeInfoMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -333,6 +338,7 @@ impl Node {
         msg: AddControlPointMessage,
     ) -> ResponseFuture<Result<(), Error>> {
         let recipient: Recipient<AddControlPointMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -349,6 +355,7 @@ impl Node {
     /// Remove a control point for the node
     fn remove_control_point(&self, msg: RemoveControlPointMessage) {
         let recipient: Recipient<RemoveControlPointMessage> = match self {
+            Node::VideoGenerator(addr) => addr.clone().recipient(),
             Node::Source(addr) => addr.clone().recipient(),
             Node::Destination(addr) => addr.clone().recipient(),
             Node::Mixer(addr) => addr.clone().recipient(),
@@ -370,6 +377,25 @@ impl SystemService for NodeManager {
 }
 
 impl NodeManager {
+    fn create_video_generator(&mut self, id: &str) -> CommandResult {
+        if self.nodes.contains_key(id) {
+            return CommandResult::Error(format!("A node already exists with id {}", id));
+        }
+
+        let source = VideoGenerator::new(id);
+        let source_addr = source.start();
+
+        self.nodes
+            .insert(id.to_string(), Node::VideoGenerator(source_addr.clone()));
+
+        self.producers
+            .insert(id.to_string(), source_addr.recipient());
+
+        trace!("Created source {}", id);
+
+        CommandResult::Success
+    }
+
     /// Create a [`Source`] and store it as a producer
     fn create_source(&mut self, id: &str, uri: &str, audio: bool, video: bool) -> CommandResult {
         if self.nodes.contains_key(id) {
@@ -863,6 +889,9 @@ impl Handler<CommandMessage> for NodeManager {
             } => self.connect_future(&link_id, &src_id, &sink_id, audio, video, config),
             Command::Disconnect { link_id } => {
                 Box::pin(actix::fut::ready(self.disconnect(&link_id)))
+            }
+            Command::CreateVideoGenerator { id } => {
+                Box::pin(actix::fut::ready(self.create_video_generator(&id)))
             }
             Command::CreateSource {
                 id,
